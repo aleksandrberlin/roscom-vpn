@@ -1,0 +1,115 @@
+name: Manage domains
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Action"
+        required: true
+        type: choice
+        options:
+          - add
+          - remove
+      list:
+        description: "List name (e.g. claude, openai, or a new name)"
+        required: true
+        type: string
+      domains:
+        description: "Domains (comma or space separated)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  manage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Update domain list
+        run: |
+          FILE="lists/${{ inputs.list }}.txt"
+          ACTION="${{ inputs.action }}"
+          DOMAINS="${{ inputs.domains }}"
+
+          # Normalize: replace commas and spaces with newlines, lowercase, dedupe
+          NORMALIZED=$(echo "$DOMAINS" | tr ',; ' '\n' | tr '[:upper:]' '[:lower:]' | sed '/^$/d' | sort -u)
+
+          if [ "$ACTION" = "add" ]; then
+            touch "$FILE"
+            while IFS= read -r domain; do
+              if ! grep -qxF "$domain" "$FILE"; then
+                echo "$domain" >> "$FILE"
+              fi
+            done <<< "$NORMALIZED"
+            sort -o "$FILE" "$FILE"
+            echo "Added domains to $FILE"
+
+          elif [ "$ACTION" = "remove" ]; then
+            if [ ! -f "$FILE" ]; then
+              echo "::error::List ${{ inputs.list }} does not exist"
+              exit 1
+            fi
+            while IFS= read -r domain; do
+              sed -i "/^${domain}$/d" "$FILE"
+            done <<< "$NORMALIZED"
+            echo "Removed domains from $FILE"
+          fi
+
+          echo "--- $FILE ---"
+          cat "$FILE"
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add lists/
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "${{ inputs.action }} domains in ${{ inputs.list }}: ${{ inputs.domains }}"
+          git push
+
+      - name: Convert domain lists
+        run: python convert.py
+
+      - name: Get version tag
+        id: ver
+        run: echo "tag=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build release notes
+        run: |
+          REPO="https://github.com/${{ github.repository }}/releases/download"
+          for TAG in "${{ steps.ver.outputs.tag }}" "latest"; do
+            {
+              echo "## Download URLs"
+              echo ""
+              for f in output/srs/*.srs; do
+                NAME=$(basename "$f")
+                echo "- [\`${NAME}\`](${REPO}/${TAG}/${NAME})"
+              done
+            } > "notes-${TAG}.md"
+          done
+
+      - name: Publish versioned release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.ver.outputs.tag }}" output/srs/*.srs \
+            --title "Rule Sets ${{ steps.ver.outputs.tag }}" \
+            --notes-file "notes-${{ steps.ver.outputs.tag }}.md" \
+            --latest=false
+
+      - name: Publish latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag 2>/dev/null || true
+          gh release create latest output/srs/*.srs \
+            --title "Rule Sets (latest)" \
+            --notes-file notes-latest.md \
+            --latest
