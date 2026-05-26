@@ -1,0 +1,60 @@
+name: Build rule-sets
+
+on:
+  push:
+    branches: [main]
+    paths: ["lists/**", "convert.py"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Convert domain lists
+        run: python convert.py
+
+      - name: Get version tag
+        id: ver
+        run: echo "tag=v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build release notes
+        id: notes
+        run: |
+          BASE="https://github.com/${{ github.repository }}/releases/download/latest"
+          BODY="## Download URLs (always latest)\n"
+          for f in output/srs/*.srs; do
+            NAME=$(basename "$f")
+            BODY="${BODY}\n- [\`${NAME}\`](${BASE}/${NAME})"
+          done
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "body<<$EOF" >> $GITHUB_OUTPUT
+          echo -e "$BODY" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+
+      - name: Publish versioned release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.ver.outputs.tag }}" output/srs/*.srs \
+            --title "Rule Sets ${{ steps.ver.outputs.tag }}" \
+            --notes "${{ steps.notes.outputs.body }}" \
+            --latest=false
+
+      - name: Publish latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag 2>/dev/null || true
+          gh release create latest output/srs/*.srs \
+            --title "Rule Sets (latest)" \
+            --notes "${{ steps.notes.outputs.body }}" \
+            --latest
