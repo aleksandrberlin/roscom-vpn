@@ -19,3 +19,4 @@ samsung.com
 54.0.0.0/8
 99.0.0.0/8
 108.128.0.0/9
+cloudfront.net
