@@ -6,3 +6,11 @@ mcspserver.net
 cspserver.net
 st-av.net
 cloudfront.net
+atlas.samsung.com
+mcsvc.samsung.com
+samsungdive.com
+samsungcloud.com
+samsungcloudsolution.com
+samsungqbe.com
+samsungads.com
+aibixby.com
