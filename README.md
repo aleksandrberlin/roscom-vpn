@@ -6,10 +6,10 @@ sing-box domain rule-sets, auto-built from plain text lists.
 
 | List | .srs (binary) | .json (source) |
 |------|---------------|----------------|
-| all (combined) | [all.srs](https://github.com/aleksandrberlin/roscom-vpn/releases/download/latest/all.srs) | [all.json](https://github.com/aleksandrberlin/roscom-vpn/blob/main/output/json/all.json) |
-| claude | [claude.srs](https://github.com/aleksandrberlin/roscom-vpn/releases/download/latest/claude.srs) | [claude.json](https://github.com/aleksandrberlin/roscom-vpn/blob/main/output/json/claude.json) |
-| openai | [openai.srs](https://github.com/aleksandrberlin/roscom-vpn/releases/download/latest/openai.srs) | [openai.json](https://github.com/aleksandrberlin/roscom-vpn/blob/main/output/json/openai.json) |
-| samsungsmartthings | [samsungsmartthings.srs](https://github.com/aleksandrberlin/roscom-vpn/releases/download/latest/samsungsmartthings.srs) | [samsungsmartthings.json](https://github.com/aleksandrberlin/roscom-vpn/blob/main/output/json/samsungsmartthings.json) |
+| all (combined) | [all.srs](https://github.com/aleksandrberlin/roscom-vpn/releases/latest/download/all.srs) | [all.json](https://github.com/aleksandrberlin/roscom-vpn/blob/main/output/json/all.json) |
+| claude | [claude.srs](https://github.com/aleksandrberlin/roscom-vpn/releases/latest/download/claude.srs) | [claude.json](https://github.com/aleksandrberlin/roscom-vpn/blob/main/output/json/claude.json) |
+| openai | [openai.srs](https://github.com/aleksandrberlin/roscom-vpn/releases/latest/download/openai.srs) | [openai.json](https://github.com/aleksandrberlin/roscom-vpn/blob/main/output/json/openai.json) |
+| samsungsmartthings | [samsungsmartthings.srs](https://github.com/aleksandrberlin/roscom-vpn/releases/latest/download/samsungsmartthings.srs) | [samsungsmartthings.json](https://github.com/aleksandrberlin/roscom-vpn/blob/main/output/json/samsungsmartthings.json) |
 
 ## sing-box config example
 
@@ -21,7 +21,7 @@ sing-box domain rule-sets, auto-built from plain text lists.
         "tag": "roscom-vpn",
         "type": "remote",
         "format": "binary",
-        "url": "https://github.com/aleksandrberlin/roscom-vpn/releases/download/latest/all.srs"
+        "url": "https://github.com/aleksandrberlin/roscom-vpn/releases/latest/download/all.srs"
       }
     ],
     "rules": [
