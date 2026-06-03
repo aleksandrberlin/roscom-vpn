@@ -32,3 +32,8 @@ encrypted-tbn2.gstatic.com
 encrypted-tbn3.gstatic.com
 streetviewpixels-pa.googleapis.com
 content-autofill.googleapis.com
+aistudio.google.com
+gemini.google.com
+generativelanguage.googleapis.com
+alkalimining-pa.googleapis.com
+proactivebackend-pa.googleapis.com
