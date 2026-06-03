@@ -47,14 +47,4 @@ jobs:
           gh release create "${{ steps.ver.outputs.tag }}" output/srs/*.srs \
             --title "Rule Sets ${{ steps.ver.outputs.tag }}" \
             --notes-file "notes-${{ steps.ver.outputs.tag }}.md" \
-            --latest=false
-
-      - name: Publish latest release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release delete latest --yes --cleanup-tag 2>/dev/null || true
-          gh release create latest output/srs/*.srs \
-            --title "Rule Sets (latest)" \
-            --notes-file notes-latest.md \
             --latest
